@@ -17,7 +17,7 @@ struct thread_priorities{
 	int id;
 	int priority;
 	int flag;//para identificar cual sigue
-}
+};
 
 struct thread_priorities usedThreads[10];
 
@@ -96,15 +96,13 @@ int chooseThread(int th){
 
 	if(th == usedThreads[0].id){
 		usedThreads[0].flag = 1;
-		if(usedThreads[1].flag == 1 || usedThreads[0].priority == usedThreads[2].priority ){
-			usedThreads[0].priority = usedThreads[0].priority++;
-		{	
+		if(usedThreads[1].flag == 1 || usedThreads[0].priority == usedThreads[2].priority )
+			usedThreads[0].priority = usedThreads[0].priority++;	
 	}
 	else if(th == usedThreads[1].id){
 		usedThreads[1].flag = 1;
-		if(usedThreads[2].flag == 1 || usedThreads[1].priority == usedThreads[2].priority ){
-			usedThreads[1].priority = usedThreads[1].priority++;
-		{		
+		if(usedThreads[2].flag == 1 || usedThreads[1].priority == usedThreads[2].priority )
+			usedThreads[1].priority = usedThreads[1].priority++;	
 	}
 	else if(th == usedThreads[2].id){
 		usedThreads[2].flag = 1;
