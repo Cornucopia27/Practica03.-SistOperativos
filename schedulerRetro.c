@@ -1,4 +1,5 @@
 #include <scheduler.h>
+#include <stdio.h>
 
 extern THANDLER threads[MAXTHREAD];
 extern int currthread;
@@ -12,11 +13,11 @@ QUEUE waitinginevent[MAXTHREAD];
 
 int chooseThread(int th);
 
-typedef struct{
+struct thread_priorities{
 	int id;
 	int priority;
-	bool flag = false;//para identificar cual sigue
-}thread_priorities
+	int flag;//para identificar cual sigue
+}
 
 struct thread_priorities usedThreads[10];
 
@@ -94,29 +95,29 @@ int chooseThread(int th){
 	int chosenOne = 0;
 
 	if(th == usedThreads[0].id){
-		usedThreads[0].flag = true;
-		if(usedThreads[1].flag == true || usedThreads[0].priority == usedThreads[2].priority ){
+		usedThreads[0].flag = 1;
+		if(usedThreads[1].flag == 1 || usedThreads[0].priority == usedThreads[2].priority ){
 			usedThreads[0].priority = usedThreads[0].priority++;
 		{	
 	}
 	else if(th == usedThreads[1].id){
-		usedThreads[1].flag = true;
-		if(usedThreads[2].flag == true || usedThreads[1].priority == usedThreads[2].priority ){
+		usedThreads[1].flag = 1;
+		if(usedThreads[2].flag == 1 || usedThreads[1].priority == usedThreads[2].priority ){
 			usedThreads[1].priority = usedThreads[1].priority++;
 		{		
 	}
 	else if(th == usedThreads[2].id){
-		usedThreads[2].flag = true;
+		usedThreads[2].flag = 1;
 		usedThreads[2].priority = usedThreads[2].priority++;
 	}
 	
 	if((usedThreads[0].priority > usedThreads[1].priority) && (usedThreads[1].priority < usedThreads[2].priority))
 		chosenOne = usedThreads[1].id;
-	else if((usedThreads[1].priority > usedThreads[2].priority) && (usedThreads[2].priority < usedThreads[1].priority))
+	else if((usedThreads[1].priority > usedThreads[2].priority) && (usedThreads[2].priority < usedThreads[0].priority))
 		chosenOne = usedThreads[2].id;
 	else chosenOne = usedThreads[0].id;
 
-	usedThreads[0].flag = false; usedThreads[1].flag = false; usedThreads[2].flag = false;	
+	usedThreads[0].flag = 0; usedThreads[1].flag = 0; usedThreads[2].flag = 0;	
 
 	return chosenOne;
 
