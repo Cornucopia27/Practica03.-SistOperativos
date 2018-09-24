@@ -16,12 +16,13 @@ int chooseThread(int th);
 struct thread_priorities{
 	int id;
 	int priority;
-	int flag;//para identificar cual sigue
+	int callingthread;
 };
 
 struct thread_priorities usedThreads[10];
 
 int contador = 0;
+int bandera = 1;
 
 int time_slice = 0;
 
@@ -40,7 +41,8 @@ void scheduler(int arguments)
 	{
 		// Un nuevo hilo va a la cola de listos
 		threads[callingthread].status=READY;
-		usedThreads[contador].id = callingthread;//threads[callingthread].tid;
+		usedThreads[contador].id = threads[callingthread].tid;
+		usedThreads[contador].callingthread = callingthread;
 		usedThreads[contador].priority = 0;
 		contador++;
 		_enqueue(&ready,callingthread);
@@ -72,7 +74,7 @@ void scheduler(int arguments)
 			time_slice++;
 			if(time_slice==TIME_SLICE)
 			{
-				chosen = chooseThread(callingthread);
+				chosen = chooseThread(threads[callingthread].tid);
 				
 				_enqueue(&ready,chosen);
 				changethread=1;
@@ -94,29 +96,30 @@ void scheduler(int arguments)
 int chooseThread(int th){
 	int chosenOne = 0;
 
-	if(th == usedThreads[0].id){
-		usedThreads[0].flag = 1;
-		if(usedThreads[1].flag == 1 || usedThreads[0].priority == usedThreads[2].priority )
-			usedThreads[0].priority = usedThreads[0].priority++;	
-	}
-	else if(th == usedThreads[1].id){
-		usedThreads[1].flag = 1;
-		if(usedThreads[2].flag == 1 || usedThreads[1].priority == usedThreads[2].priority )
-			usedThreads[1].priority = usedThreads[1].priority++;	
-	}
-	else if(th == usedThreads[2].id){
-		usedThreads[2].flag = 1;
-		usedThreads[2].priority = usedThreads[2].priority++;
-	}
+	if((usedThreads[0].priority > usedThreads[1].priority)&&(usedThreads[1].priority == usedThreads[2].priority))
+		chosenOne = usedThreads[1].callingthread;
 	
-	if((usedThreads[0].priority > usedThreads[1].priority) && (usedThreads[1].priority < usedThreads[2].priority))
-		chosenOne = usedThreads[1].id;
 	else if((usedThreads[1].priority > usedThreads[2].priority) && (usedThreads[2].priority < usedThreads[0].priority))
-		chosenOne = usedThreads[2].id;
-	else chosenOne = usedThreads[0].id;
+		chosenOne = usedThreads[2].callingthread;
+	
+	else if((usedThreads[0].priority == usedThreads[1].priority) && (usedThreads[0].priority == usedThreads[2].priority))
+		chosenOne = usedThreads[0].callingthread;
+	
 
-	usedThreads[0].flag = 0; usedThreads[1].flag = 0; usedThreads[2].flag = 0;	
 
+	
+	if(th == usedThreads[1].id)
+			usedThreads[0].priority = usedThreads[0].priority++;
+			
+	else if(th == usedThreads[2].id)
+		if(bandera == 1){
+			usedThreads[1].priority = usedThreads[1].priority++;
+			bandera = 0;
+		}
+		else{
+			usedThreads[1].priority = usedThreads[1].priority++;
+			usedThreads[2].priority = usedThreads[2].priority++;
+		}	
 	return chosenOne;
 
 }
