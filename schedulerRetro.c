@@ -99,9 +99,10 @@ int chooseThread(int th){
 	if((usedThreads[0].priority > usedThreads[1].priority)&&(usedThreads[1].priority == usedThreads[2].priority))
 		chosenOne = usedThreads[1].callingthread;
 	
-	else if((usedThreads[1].priority > usedThreads[2].priority) && (usedThreads[2].priority < usedThreads[0].priority))
+	else if((usedThreads[1].priority > usedThreads[2].priority) && (usedThreads[2].priority < usedThreads[0].priority)){
 		chosenOne = usedThreads[2].callingthread;
-	
+		usedThreads[2].priority = usedThreads[2].priority++;
+	}
 	else if((usedThreads[0].priority == usedThreads[1].priority) && (usedThreads[0].priority == usedThreads[2].priority))
 		chosenOne = usedThreads[0].callingthread;
 	
@@ -112,14 +113,8 @@ int chooseThread(int th){
 			usedThreads[0].priority = usedThreads[0].priority++;
 			
 	else if(th == usedThreads[2].id)
-		if(bandera == 1){
 			usedThreads[1].priority = usedThreads[1].priority++;
-			bandera = 0;
-		}
-		else{
-			usedThreads[1].priority = usedThreads[1].priority++;
-			usedThreads[2].priority = usedThreads[2].priority++;
-		}	
+				
 	return chosenOne;
 
 }
