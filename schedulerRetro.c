@@ -23,8 +23,7 @@ struct thread_priorities usedThreads[10];
 
 int contador = 0;
 int bandera = 1;
-int firstime = 0;
-int thr=0, thr2=0;
+
 int time_slice = 0;
 
 void scheduler(int arguments)
@@ -75,20 +74,8 @@ void scheduler(int arguments)
 			time_slice++;
 			if(time_slice==TIME_SLICE)
 			{
-				thr = threads[callingthread].tid;
-				if(firstime==1){
-					if(thr=!thr2){
-						chosen = chooseThread(threads[callingthread].tid);
-						_enqueue(&ready,chosen);						
-					}
-					else
-						_enqueue(&ready,callingthread);	
-				}
-				else{
-					firstime = 1;	
-					_enqueue(&ready,callingthread);	
-				}
-				thr2=thr;
+				chosen = chooseThread(threads[callingthread].tid);
+				_enqueue(&ready,chosen);
 				changethread=1;
 				time_slice = 0;
 			}
@@ -137,8 +124,19 @@ int chooseThread(int th){
 		if(usedThreads[2].priority=!0)
 			usedThreads[2].priority = usedThreads[2].priority++;
 	}
+
+	/*if((th = usedThreads[0].id) && (usedThreads[0].priority=!0))
+			usedThreads[0].priority = usedThreads[0].priority++;
 	
+	else if((th = usedThreads[1].id) && (usedThreads[1].priority=!0))
+			usedThreads[1].priority = usedThreads[1].priority++;
+	
+	else if((th = usedThreads[2].id) && (usedThreads[2].priority=!0))
+			usedThreads[2].priority = usedThreads[2].priority++;
+
+	*/
 	
 	return chosenOne;
 
 }
+
