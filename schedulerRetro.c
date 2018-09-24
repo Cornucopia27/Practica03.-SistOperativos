@@ -7,23 +7,18 @@ extern int blockevent;
 extern int unblockevent;
 
 #define TIME_SLICE 1
+#define PRIORITIES 10
 
 QUEUE ready;
 QUEUE waitinginevent[MAXTHREAD];
 
-int chooseThread(int th);
-
-struct thread_priorities{
-	int id;
-	int priority;
-	int flag;//para identificar cual sigue
-};
-
-struct thread_priorities usedThreads[10];
-
-int contador = 0;
+QUEUE PR_QUEUE[PRIORITIES];
 
 int time_slice = 0;
+int thread_num = 0;
+int threads_priorities[PRIORITIES];
+
+int init = 1;
 
 void scheduler(int arguments)
 {
@@ -33,16 +28,25 @@ void scheduler(int arguments)
 
 	int event=arguments & 0xFF00;
 	int callingthread=arguments & 0xFF;
-	
-	int chosen = 0;
+
+	if(init == 1)
+	{
+		int init_counter;
+		init--;
+		for(init_counter = 0; init_counter<PRIORITIES; init_counter++)
+		{
+			PR_QUEUE[init_counter].head = 0;
+			PR_QUEUE[init_counter].tail = 0;
+			threads_priorities[init_counter] = 0;
+		}
+	}
 
 	if(event==NEWTHREAD)
 	{
 		// Un nuevo hilo va a la cola de listos
 		threads[callingthread].status=READY;
-		usedThreads[contador].id = callingthread;//threads[callingthread].tid;
-		usedThreads[contador].priority = 0;
-		contador++;
+		threads_priorities[callingthread] = 0;
+		thread_num++;
 		_enqueue(&ready,callingthread);
 	}
 
@@ -51,7 +55,6 @@ void scheduler(int arguments)
 
 		threads[callingthread].status=BLOCKED;
 		_enqueue(&waitinginevent[blockevent],callingthread);
-
 		changethread=1;
 	}
 
@@ -59,6 +62,7 @@ void scheduler(int arguments)
 	{
 		threads[callingthread].status=END;
 		changethread=1;
+		thread_num--;
 	}
 
 	if(event==UNBLOCKTHREAD)
@@ -72,11 +76,28 @@ void scheduler(int arguments)
 			time_slice++;
 			if(time_slice==TIME_SLICE)
 			{
-				chosen = chooseThread(callingthread);
-				
-				_enqueue(&ready,chosen);
-				changethread=1;
-				time_slice = 0;
+					if(thread_num == 1)
+					{
+						threads_priorities[callingthread] = 0;
+					}
+					if(threads_priorities[callingthread] < PRIORITIES)
+					{
+						threads_priorities[callingthread]++;
+					}
+						_enqueue(&PR_QUEUE[threads_priorities[callingthread]], callingthread);
+
+					int contador, index = 0;
+					for(contador = PRIORITIES-1; contador>=0; contador--)
+					{
+						if((threads_priorities[contador] <= threads_priorities[index] && (threads[contador].status == READY || threads[contador].status == RUNNING)))
+						{
+							index = contador;
+						}
+					}
+
+					_enqueue(&ready,_dequeue(&PR_QUEUE[threads_priorities[index]]));
+					changethread=1;
+					time_slice = 0;
 			}
 	}
 
@@ -88,35 +109,5 @@ void scheduler(int arguments)
 		threads[next].status=RUNNING;
 		_swapthreads(old,next);
 	}
-
-}
-
-int chooseThread(int th){
-	int chosenOne = 0;
-
-	if(th == usedThreads[0].id){
-		usedThreads[0].flag = 1;
-		if(usedThreads[1].flag == 1 || usedThreads[0].priority == usedThreads[2].priority )
-			usedThreads[0].priority = usedThreads[0].priority++;	
-	}
-	else if(th == usedThreads[1].id){
-		usedThreads[1].flag = 1;
-		if(usedThreads[2].flag == 1 || usedThreads[1].priority == usedThreads[2].priority )
-			usedThreads[1].priority = usedThreads[1].priority++;	
-	}
-	else if(th == usedThreads[2].id){
-		usedThreads[2].flag = 1;
-		usedThreads[2].priority = usedThreads[2].priority++;
-	}
-	
-	if((usedThreads[0].priority > usedThreads[1].priority) && (usedThreads[1].priority < usedThreads[2].priority))
-		chosenOne = usedThreads[1].id;
-	else if((usedThreads[1].priority > usedThreads[2].priority) && (usedThreads[2].priority < usedThreads[0].priority))
-		chosenOne = usedThreads[2].id;
-	else chosenOne = usedThreads[0].id;
-
-	usedThreads[0].flag = 0; usedThreads[1].flag = 0; usedThreads[2].flag = 0;	
-
-	return chosenOne;
 
 }
