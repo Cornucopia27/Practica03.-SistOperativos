@@ -96,23 +96,28 @@ void scheduler(int arguments)
 int chooseThread(int th){
 	int chosenOne = 0;
 
-	if((usedThreads[0].priority > usedThreads[1].priority)&&(usedThreads[1].priority == usedThreads[2].priority))
+	if((usedThreads[0].priority > usedThreads[1].priority)&&(usedThreads[1].priority == usedThreads[2].priority)){
 		chosenOne = usedThreads[1].callingthread;
-	
+		usedThreads[1].priority = usedThreads[1].priority++;
+	}
 	else if((usedThreads[1].priority > usedThreads[2].priority) && (usedThreads[2].priority < usedThreads[0].priority)){
 		chosenOne = usedThreads[2].callingthread;
 		usedThreads[2].priority = usedThreads[2].priority++;
 	}
-	else if((usedThreads[0].priority == usedThreads[1].priority) && (usedThreads[0].priority == usedThreads[2].priority))
+	else if((usedThreads[0].priority == usedThreads[1].priority) && (usedThreads[0].priority == usedThreads[2].priority)){
 		chosenOne = usedThreads[0].callingthread;
+		if(usedThreads[0].priority=!0)
+			usedThreads[0].priority = usedThreads[0].priority = usedThreads[0].priority++;
+	}
+		
 	
 
 
 	
-	if(th == usedThreads[1].id)
+	if(th == usedThreads[1].id && usedThreads[0].priority==0)
 			usedThreads[0].priority = usedThreads[0].priority++;
 			
-	else if(th == usedThreads[2].id)
+	else if(th == usedThreads[2].id && usedThreads[1].priority==0)
 			usedThreads[1].priority = usedThreads[1].priority++;
 				
 	return chosenOne;
